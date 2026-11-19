@@ -18,8 +18,8 @@ repositories {
     maven("https://repo.oraxen.com/releases/")
     maven("https://maven.enginehub.org/repo/") {
         content {
-            includeGroup("com.sk89q.worldguard")
-            includeGroup("com.sk89q.worldedit")
+            includeGroupAndSubgroups("com.sk89q.worldguard")
+            includeGroupAndSubgroups("com.sk89q.worldedit")
         }
     }
 }
