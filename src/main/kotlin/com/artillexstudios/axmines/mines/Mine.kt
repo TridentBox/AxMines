@@ -6,6 +6,7 @@ import com.artillexstudios.axapi.serializers.Serializers
 import com.artillexstudios.axapi.utils.ActionBar
 import com.artillexstudios.axapi.utils.ItemBuilder
 import com.artillexstudios.axapi.utils.StringUtils
+import com.artillexstudios.axmines.AxMinesPlugin
 import com.artillexstudios.axmines.config.impl.Config
 import com.artillexstudios.axmines.config.impl.MineConfig
 import com.artillexstudios.axmines.mines.setter.BlockSetter
@@ -47,6 +48,8 @@ class Mine(val file: File, reset: Boolean = true) {
     val name: String = file.nameWithoutExtension
     val config: MineConfig = MineConfig("mines/${file.name}")
     lateinit var cuboid: Cuboid
+    internal val loadedCuboid: Cuboid?
+        get() = if (::cuboid.isInitialized) cuboid else null
     private lateinit var placer: BlockSetter
     var volume = 0.0
         private set
@@ -322,6 +325,7 @@ class Mine(val file: File, reset: Boolean = true) {
             corner1.blockY,
             corner2.blockY
         )
+        AxMinesPlugin.INSTANCE.syncMineRegions()
 
         if (Config.DEBUG) {
             LOGGER.info("Reloaded config! $corner1 $corner2")

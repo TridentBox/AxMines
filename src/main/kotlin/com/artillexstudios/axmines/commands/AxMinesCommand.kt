@@ -43,7 +43,9 @@ class AxMinesCommand {
     @Subcommand("delete")
     @CommandPermission("axmines.command.delete")
     fun delete(sender: CommandSender, mine: Mine) {
-        Mines.unregister(mine)
+        if (!Mines.delete(mine)) {
+            sender.sendMessage("Could not delete mine ${mine.name}.")
+        }
     }
 
     @Subcommand("list")

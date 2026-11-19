@@ -16,6 +16,12 @@ repositories {
     maven("https://jitpack.io/")
     maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
     maven("https://repo.oraxen.com/releases/")
+    maven("https://maven.enginehub.org/repo/") {
+        content {
+            includeGroup("com.sk89q.worldguard")
+            includeGroup("com.sk89q.worldedit")
+        }
+    }
 }
 
 dependencies {
@@ -31,6 +37,7 @@ dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.3.21")
     compileOnly("com.github.oraxen:oraxen:1.161.0")
     compileOnly("com.github.LoneDev6:api-itemsadder:3.6.1")
+    compileOnly("com.sk89q.worldguard:worldguard-bukkit:7.0.17")
 }
 
 tasks {

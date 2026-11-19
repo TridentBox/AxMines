@@ -13,6 +13,7 @@ import com.artillexstudios.axmines.commands.AxMinesCommand
 import com.artillexstudios.axmines.config.impl.Config
 import com.artillexstudios.axmines.config.impl.Messages
 import com.artillexstudios.axmines.integrations.PlaceholderAPIIntegration
+import com.artillexstudios.axmines.integrations.WorldGuardRegions
 import com.artillexstudios.axmines.listener.BlockListener
 import com.artillexstudios.axmines.mines.Mine
 import com.artillexstudios.axmines.mines.MineTicker
@@ -26,6 +27,7 @@ import revxrsal.commands.bukkit.BukkitCommandHandler
 
 class AxMinesPlugin : AxPlugin() {
     private val metrics = AxMetrics(this, 4)
+    private var worldGuardRegions: WorldGuardRegions? = null
 
     companion object {
         lateinit var INSTANCE: AxMinesPlugin
@@ -62,6 +64,11 @@ class AxMinesPlugin : AxPlugin() {
         commandHandler.registerBrigadier()
 
         Bukkit.getPluginManager().registerEvents(BlockListener(), this)
+        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
+            val regions = WorldGuardRegions(this)
+            worldGuardRegions = regions
+            Bukkit.getPluginManager().registerEvents(regions, this)
+        }
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             PlaceholderAPIIntegration().register()
@@ -116,7 +123,12 @@ class AxMinesPlugin : AxPlugin() {
     }
 
     override fun disable() {
+        worldGuardRegions = null
         this.metrics.cancel()
+    }
+
+    internal fun syncMineRegions() {
+        worldGuardRegions?.scheduleSync()
     }
 
     override fun dependencies(manager: DependencyManagerWrapper) {

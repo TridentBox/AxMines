@@ -1,6 +1,9 @@
 package com.artillexstudios.axmines.mines
 
+import com.artillexstudios.axmines.AxMinesPlugin
 import com.artillexstudios.axmines.utils.FileUtils
+import java.io.IOException
+import java.nio.file.Files
 import java.util.Locale
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -16,25 +19,33 @@ object Mines {
         }
 
         val files = org.apache.commons.io.FileUtils.listFiles(MINES_FOLDER, arrayOf("yaml", "yml"), true)
-
+            .filterNot { it.name.contains("_example") }
+            .toSet()
+        TYPES.entries.removeIf { it.value.file !in files }
         files.forEach { file ->
-            if (file.name.contains("_example")) return@forEach
-            val mine = TYPES[file.nameWithoutExtension]
-
-            if (mine == null) {
-                Mine(file)
-            } else {
-                mine.reload()
+            val name = file.nameWithoutExtension.lowercase(Locale.ENGLISH)
+            val mine = TYPES[name]
+            when {
+                mine == null -> Mine(file)
+                mine.file == file -> mine.reload()
+                else -> LOGGER.warn("Skipping duplicate mine '{}' from {}", name, file)
             }
         }
-
-        TYPES.entries.removeIf { entry ->
-            return@removeIf !files.contains(entry.value.file)
-        }
+        AxMinesPlugin.INSTANCE.syncMineRegions()
     }
 
-    fun unregister(mine: Mine) {
-        TYPES.remove(mine.name.lowercase(Locale.ENGLISH))
+    fun delete(mine: Mine): Boolean {
+        val name = mine.name.lowercase(Locale.ENGLISH)
+        if (TYPES[name] !== mine) return false
+        try {
+            Files.deleteIfExists(mine.file.toPath())
+        } catch (exception: IOException) {
+            LOGGER.error("Could not delete mine file {}", mine.file, exception)
+            return false
+        }
+        TYPES.remove(name)
+        AxMinesPlugin.INSTANCE.syncMineRegions()
+        return true
     }
 
     fun register(mine: Mine) {
